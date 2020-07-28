@@ -6,7 +6,6 @@ export class NetworkingStack extends cdk.Stack {
         super(scope, id, props);
 
         const vpc = new ec2.Vpc(this, 'sandbox-vpc', {
-            // 16 addresses
             cidr: '10.0.0.0/16',
             subnetConfiguration: [
                 {
