@@ -5,7 +5,6 @@ build:
 	docker build -t $(IMAGE_NAME) .
 
 cdk-command = cdk $(1) $(2) \
-	--profile personal \
 	-c email=$(EMAIL)
 
 cdk-command:
