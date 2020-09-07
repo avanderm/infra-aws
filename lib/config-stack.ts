@@ -18,10 +18,16 @@ export class ConfigStack extends cdk.Stack {
             removalPolicy: cdk.RemovalPolicy.DESTROY
         });
 
-        const bucketAclPolicies = new iam.PolicyStatement({
+        const bucketAclPolicy = new iam.PolicyStatement({
             effect: iam.Effect.ALLOW,
             resources: [bucket.bucketArn],
             actions: ['s3:GetBucketAcl'],
+        });
+
+        const bucketPutPolicy = new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            resources: [`${bucket.bucketArn}/AWSLogs/${account}/*`],
+            actions: ['s3:PutObject'],
             conditions: {
                 StringLike: {
                     's3:x-amz-acl': 'bucket-owner-full-control'
@@ -34,7 +40,8 @@ export class ConfigStack extends cdk.Stack {
             inlinePolicies: {
                 's3': new iam.PolicyDocument({
                     statements: [
-                        bucketAclPolicies
+                        bucketAclPolicy,
+                        bucketPutPolicy
                     ]
                 })
             },
@@ -43,8 +50,6 @@ export class ConfigStack extends cdk.Stack {
             ]
         });
         
-        bucket.grantWrite(role, `AWSLogs/${account}/Config/${region}`);
-
         const topic = new sns.Topic(this, 'ConfigTopic', {
             topicName: 'AWSConfigAlerts'
         });
