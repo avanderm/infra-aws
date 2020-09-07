@@ -1,9 +1,13 @@
 import cdk = require('@aws-cdk/core');
+import config = require('@aws-cdk/aws-config');
 import iam = require('@aws-cdk/aws-iam');
+import targets = require('@aws-cdk/aws-events-targets');
 import s3 = require('@aws-cdk/aws-s3');
 import sns = require('@aws-cdk/aws-sns');
 
 export class ConfigStack extends cdk.Stack {
+    public readonly configTopic: sns.Topic;
+
     /**
      * See: https://docs.aws.amazon.com/config/latest/developerguide/iamrole-permissions.html
      */
@@ -55,5 +59,30 @@ export class ConfigStack extends cdk.Stack {
         });
 
         topic.grantPublish(role);
+
+        this.configTopic = topic;
+    }
+}
+
+interface ConfigRulesStackProps extends cdk.StackProps {
+    configTopic: sns.Topic;
+}
+
+export class ConfigRulesStack extends cdk.Stack {
+    constructor(scope: cdk.Construct, id: string, props: ConfigRulesStackProps) {
+        super(scope, id, props);
+
+        const tagRule = new config.ManagedRule(this, 'RequiredTags', {
+            identifier: 'REQUIRED_TAGS',
+            inputParameters: {
+                'tag1Key': 'Environment',
+                'tag1Value': 'test,staging,production',
+                'tag2Key': 'Project'
+            }
+        });
+
+        tagRule.onComplianceChange('ComplianceChange', {
+            target: new targets.SnsTopic(props.configTopic)
+        });
     }
 }

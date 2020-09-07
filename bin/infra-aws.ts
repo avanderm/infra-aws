@@ -3,7 +3,7 @@ import 'source-map-support/register';
 import cdk = require('@aws-cdk/core');
 import { BudgetStack } from '../lib/budget-stack';
 import { NetworkingStack } from '../lib/networking-stack';
-import { ConfigStack } from '../lib/config-stack';
+import { ConfigStack, ConfigRulesStack } from '../lib/config-stack';
 // import { DnsStack } from '../lib/dns-stack';
 
 const app = new cdk.App();
@@ -35,7 +35,7 @@ new NetworkingStack(app, 'Networking', {
     }
 });
 
-new ConfigStack(app, 'Config', {
+const configStack = new ConfigStack(app, 'Config', {
     env: {
         account: process.env.CDK_DEPLOY_ACCOUNT || process.env.CDK_DEFAULT_ACCOUNT,
         region: process.env.CDK_DEPLOY_REGION || process.env.CDK_DEFAULT_REGION
@@ -44,6 +44,18 @@ new ConfigStack(app, 'Config', {
         Environment: environment,
         Project: 'general'
     }
+});
+
+const configRulesStack = new ConfigRulesStack(app, 'ConfigRules', {
+    env: {
+        account: process.env.CDK_DEPLOY_ACCOUNT || process.env.CDK_DEFAULT_ACCOUNT,
+        region: process.env.CDK_DEPLOY_REGION || process.env.CDK_DEFAULT_REGION
+    },
+    tags: {
+        Environment: environment,
+        Project: 'general'
+    },
+    configTopic: configStack.configTopic
 });
 
 // new DnsStack(app, 'DNS', {
