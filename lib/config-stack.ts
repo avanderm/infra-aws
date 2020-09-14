@@ -73,6 +73,7 @@ export class ConfigRulesStack extends cdk.Stack {
         super(scope, id, props);
 
         const tagRule = new config.ManagedRule(this, 'RequiredTags', {
+            description: 'Ensure all resources conform to our tagging strategy.',
             identifier: 'REQUIRED_TAGS',
             inputParameters: {
                 'tag1Key': 'Environment',
@@ -82,6 +83,15 @@ export class ConfigRulesStack extends cdk.Stack {
         });
 
         tagRule.onComplianceChange('ComplianceChange', {
+            target: new targets.SnsTopic(props.configTopic)
+        });
+
+        const systemsManagerRule = new config.ManagedRule(this, 'ManagedBySSM', {
+            description: 'All instances are manager by the AWS Systems Manager.',
+            identifier: 'EC2_INSTANCE_MANAGED_BY_SSM'
+        });
+
+        systemsManagerRule.onComplianceChange('ComplianceChange', {
             target: new targets.SnsTopic(props.configTopic)
         });
     }
