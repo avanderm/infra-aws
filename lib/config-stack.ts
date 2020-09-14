@@ -60,6 +60,16 @@ export class ConfigStack extends cdk.Stack {
 
         topic.grantPublish(role);
 
+        const budgetPermissions = new iam.PolicyStatement({
+            principals: [
+                new iam.ServicePrincipal('budgets.amazonaws.com')
+            ],
+            actions: [ 'sns:Publish' ],
+            resources: [ '*' ]
+        });
+
+        topic.addToResourcePolicy(budgetPermissions);
+
         this.configTopic = topic;
     }
 }

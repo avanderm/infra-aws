@@ -1,8 +1,10 @@
 import cdk = require('@aws-cdk/core');
 import budgets = require('@aws-cdk/aws-budgets');
+import sns = require('@aws-cdk/aws-sns');
 
 export interface BudgetStackProps extends cdk.StackProps {
   email?: string;
+  topic: sns.ITopic;
 }
 
 export class BudgetStack extends cdk.Stack {
@@ -15,8 +17,14 @@ export class BudgetStack extends cdk.Stack {
       subscribers.push({
         address: props.email,
         subscriptionType: 'EMAIL'
-      })
+      });
     }
+
+    // ChatBot notification
+    subscribers.push({
+        address: props.topic.topicArn,
+        subscriptionType: 'SNS'
+    });
 
     const budget = new budgets.CfnBudget(this, 'Budget', {
       budget: {
