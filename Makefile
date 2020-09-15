@@ -7,7 +7,8 @@ build:
 
 cdk-command = cdk $(1) $(2) \
 	-c email=$(EMAIL) \
-	-c workspaceId=$(WORKSPACE_ID)
+	-c workspaceId=$(WORKSPACE_ID) \
+	-c dataBunkerAccount=$(DATA_BUNKER_ACCOUNT)
 
 cdk-command:
 	$(call cdk-command,$(COMMAND),$(STACK))
@@ -16,6 +17,7 @@ run: build
 	docker run \
 		-e "CDK_DEPLOY_ACCOUNT=$(CDK_DEPLOY_ACCOUNT)" \
 		-e "CDK_DEPLOY_REGION=$(CDK_DEPLOY_REGION)" \
+		-e "DATA_BUNKER_ACCOUNT=$(DATA_BUNKER_ACCOUNT)" \
 		-e "STACK=$(STACK)" \
 		-e "COMMAND=$(COMMAND)" \
 		-v $(HOME)/.aws:/root/.aws \

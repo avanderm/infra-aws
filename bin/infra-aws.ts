@@ -6,6 +6,7 @@ import { NetworkingStack } from '../lib/networking-stack';
 import { RolesStack } from '../lib/roles-stack';
 import { ConfigStack } from '../lib/config-stack';
 import { ChatOpsStack } from '../lib/chatops-stack';
+import { TrailStack } from '../lib/trail-stack';
 // import { DnsStack } from '../lib/dns-stack';
 
 const app = new cdk.App();
@@ -14,6 +15,7 @@ const environment = process.env.CDK_ENVIRONMENT || 'test';
 
 const email = app.node.tryGetContext('email');
 const workspaceId = app.node.tryGetContext('workspaceId');
+const dataBunkerAccount = app.node.tryGetContext('dataBunkerAccount');
 
 new NetworkingStack(app, 'Networking', {
     env: {
@@ -72,4 +74,16 @@ new ChatOpsStack(app, 'ChatOps', {
     budgetTopic: budgetStack.topic,
     configTopic: configStack.topic,
     workspaceId: workspaceId
+});
+
+new TrailStack(app, 'Trail', {
+    env: {
+        account: process.env.CDK_DEPLOY_ACCOUNT || process.env.CDK_DEFAULT_ACCOUNT,
+        region: process.env.CDK_DEPLOY_REGION || process.env.CDK_DEFAULT_REGION
+    },
+    tags: {
+        Environment: environment,
+        Project: 'general'
+    },
+    dataBunkerAccount: dataBunkerAccount
 });

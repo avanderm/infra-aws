@@ -3,7 +3,6 @@ import * as chatbot from '@aws-cdk/aws-chatbot';
 import * as iam from '@aws-cdk/aws-iam';
 import * as sns from '@aws-cdk/aws-sns';
 
-
 interface ChatOpsStackProps extends cdk.StackProps {
     budgetTopic: sns.ITopic;
     configTopic: sns.ITopic;
