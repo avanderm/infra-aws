@@ -1,10 +1,10 @@
 import cdk = require('@aws-cdk/core');
 import budgets = require('@aws-cdk/aws-budgets');
+import iam = require('@aws-cdk/aws-iam');
 import sns = require('@aws-cdk/aws-sns');
 
 export interface BudgetStackProps extends cdk.StackProps {
   email?: string;
-  topic: sns.ITopic;
 }
 
 export class BudgetStack extends cdk.Stack {
@@ -12,6 +12,20 @@ export class BudgetStack extends cdk.Stack {
     super(scope, id, props);
 
     const subscribers = [];
+
+    const topic = new sns.Topic(this, 'BudgetAlertsTopic', {
+        topicName: 'AWSBudgetAlerts'
+    });
+
+    const budgetPermissions = new iam.PolicyStatement({
+        principals: [
+            new iam.ServicePrincipal('budgets.amazonaws.com')
+        ],
+        actions: [ 'sns:Publish' ],
+        resources: [ '*' ]
+    });
+
+    topic.addToResourcePolicy(budgetPermissions);
 
     if (props.email) {
       subscribers.push({
@@ -22,7 +36,7 @@ export class BudgetStack extends cdk.Stack {
 
     // ChatBot notification
     subscribers.push({
-        address: props.topic.topicArn,
+        address: topic.topicArn,
         subscriptionType: 'SNS'
     });
 

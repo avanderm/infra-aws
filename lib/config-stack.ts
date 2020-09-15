@@ -6,8 +6,6 @@ import s3 = require('@aws-cdk/aws-s3');
 import sns = require('@aws-cdk/aws-sns');
 
 export class ConfigStack extends cdk.Stack {
-    public readonly configTopic: sns.Topic;
-
     /**
      * See: https://docs.aws.amazon.com/config/latest/developerguide/iamrole-permissions.html
      */
@@ -54,33 +52,11 @@ export class ConfigStack extends cdk.Stack {
             ]
         });
         
-        const topic = new sns.Topic(this, 'ConfigTopic', {
+        const topic = new sns.Topic(this, 'ConfigAlertsTopic', {
             topicName: 'AWSConfigAlerts'
         });
 
         topic.grantPublish(role);
-
-        const budgetPermissions = new iam.PolicyStatement({
-            principals: [
-                new iam.ServicePrincipal('budgets.amazonaws.com')
-            ],
-            actions: [ 'sns:Publish' ],
-            resources: [ '*' ]
-        });
-
-        topic.addToResourcePolicy(budgetPermissions);
-
-        this.configTopic = topic;
-    }
-}
-
-interface ConfigRulesStackProps extends cdk.StackProps {
-    configTopic: sns.Topic;
-}
-
-export class ConfigRulesStack extends cdk.Stack {
-    constructor(scope: cdk.Construct, id: string, props: ConfigRulesStackProps) {
-        super(scope, id, props);
 
         const tagRule = new config.ManagedRule(this, 'RequiredTags', {
             description: 'Ensure all resources conform to our tagging strategy.',
@@ -93,7 +69,7 @@ export class ConfigRulesStack extends cdk.Stack {
         });
 
         tagRule.onComplianceChange('ComplianceChange', {
-            target: new targets.SnsTopic(props.configTopic)
+            target: new targets.SnsTopic(topic)
         });
 
         const systemsManagerRule = new config.ManagedRule(this, 'ManagedBySSM', {
@@ -102,7 +78,7 @@ export class ConfigRulesStack extends cdk.Stack {
         });
 
         systemsManagerRule.onComplianceChange('ComplianceChange', {
-            target: new targets.SnsTopic(props.configTopic)
+            target: new targets.SnsTopic(topic)
         });
     }
 }
