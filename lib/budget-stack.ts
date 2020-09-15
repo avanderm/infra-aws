@@ -1,66 +1,71 @@
-import cdk = require('@aws-cdk/core');
-import budgets = require('@aws-cdk/aws-budgets');
-import iam = require('@aws-cdk/aws-iam');
-import sns = require('@aws-cdk/aws-sns');
+import * as cdk from '@aws-cdk/core';
+import * as budgets from '@aws-cdk/aws-budgets';
+import * as iam from '@aws-cdk/aws-iam';
+import * as sns from '@aws-cdk/aws-sns';
+
 
 export interface BudgetStackProps extends cdk.StackProps {
-  email?: string;
+    email?: string;
 }
 
 export class BudgetStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props: BudgetStackProps) {
-    super(scope, id, props);
+    public readonly topic: sns.ITopic;
 
-    const subscribers = [];
+    constructor(scope: cdk.Construct, id: string, props: BudgetStackProps) {
+        super(scope, id, props);
 
-    const topic = new sns.Topic(this, 'BudgetAlertsTopic', {
-        topicName: 'AWSBudgetAlerts'
-    });
+        const subscribers = [];
 
-    const budgetPermissions = new iam.PolicyStatement({
-        principals: [
-            new iam.ServicePrincipal('budgets.amazonaws.com')
-        ],
-        actions: [ 'sns:Publish' ],
-        resources: [ '*' ]
-    });
+        const topic = new sns.Topic(this, 'BudgetAlertsTopic', {
+            topicName: 'AWSBudgetAlerts'
+        });
 
-    topic.addToResourcePolicy(budgetPermissions);
+        const budgetPermissions = new iam.PolicyStatement({
+            principals: [
+                new iam.ServicePrincipal('budgets.amazonaws.com')
+            ],
+            actions: [ 'sns:Publish' ],
+            resources: [ '*' ]
+        });
 
-    if (props.email) {
-      subscribers.push({
-        address: props.email,
-        subscriptionType: 'EMAIL'
-      });
-    }
+        topic.addToResourcePolicy(budgetPermissions);
 
-    // ChatBot notification
-    subscribers.push({
-        address: topic.topicArn,
-        subscriptionType: 'SNS'
-    });
-
-    const budget = new budgets.CfnBudget(this, 'Budget', {
-      budget: {
-        budgetType: 'COST',
-        budgetLimit: {
-          amount: 40,
-          unit: 'USD'
-        },
-        budgetName: 'MonthlyBudget',
-        timeUnit: 'MONTHLY'
-      },
-      notificationsWithSubscribers: [
-        {
-          notification: {
-            comparisonOperator: 'GREATER_THAN',
-            notificationType: 'ACTUAL',
-            threshold: 100,
-            thresholdType: 'PERCENTAGE'
-          },
-          subscribers: subscribers
+        if (props.email) {
+            subscribers.push({
+                address: props.email,
+                subscriptionType: 'EMAIL'
+            });
         }
-      ]
-    });
-  }
+
+        // ChatBot notification
+        subscribers.push({
+            address: topic.topicArn,
+            subscriptionType: 'SNS'
+        });
+
+        const budget = new budgets.CfnBudget(this, 'Budget', {
+            budget: {
+                budgetType: 'COST',
+                budgetLimit: {
+                    amount: 40,
+                    unit: 'USD'
+                },
+                budgetName: 'MonthlyBudget',
+                timeUnit: 'MONTHLY'
+            },
+            notificationsWithSubscribers: [
+                {
+                    notification: {
+                        comparisonOperator: 'GREATER_THAN',
+                        notificationType: 'ACTUAL',
+                        threshold: 100,
+                        thresholdType: 'PERCENTAGE'
+                    },
+                    subscribers: subscribers
+                }
+            ]
+        });
+
+        this.topic = topic;
+    }
 }

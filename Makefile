@@ -1,11 +1,13 @@
 IMAGE_NAME=infra-aws
 EMAIL=avdmeers@gmail.com
+WORKSPACE_ID=TC67L3DCG
 
 build:
 	docker build -t $(IMAGE_NAME) .
 
 cdk-command = cdk $(1) $(2) \
-	-c email=$(EMAIL)
+	-c email=$(EMAIL) \
+	-c workspaceId=$(WORKSPACE_ID)
 
 cdk-command:
 	$(call cdk-command,$(COMMAND),$(STACK))

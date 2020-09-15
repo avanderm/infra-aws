@@ -1,14 +1,16 @@
-import cdk = require('@aws-cdk/core');
-import config = require('@aws-cdk/aws-config');
-import iam = require('@aws-cdk/aws-iam');
-import targets = require('@aws-cdk/aws-events-targets');
-import s3 = require('@aws-cdk/aws-s3');
-import sns = require('@aws-cdk/aws-sns');
+import * as cdk from '@aws-cdk/core';
+import * as config from '@aws-cdk/aws-config';
+import * as iam from '@aws-cdk/aws-iam';
+import * as s3 from '@aws-cdk/aws-s3';
+import * as sns from '@aws-cdk/aws-sns';
+import * as targets from '@aws-cdk/aws-events-targets';
 
 export class ConfigStack extends cdk.Stack {
     /**
      * See: https://docs.aws.amazon.com/config/latest/developerguide/iamrole-permissions.html
      */
+    public readonly topic: sns.ITopic;
+
     constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
@@ -80,5 +82,7 @@ export class ConfigStack extends cdk.Stack {
         systemsManagerRule.onComplianceChange('ComplianceChange', {
             target: new targets.SnsTopic(topic)
         });
+
+        this.topic = topic;
     }
 }

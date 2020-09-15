@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@aws-cdk/aws-budgets": "^1.62.0",
+    "@aws-cdk/aws-chatbot": "^1.62.0",
     "@aws-cdk/aws-config": "^1.62.0",
     "@aws-cdk/aws-ec2": "^1.62.0",
     "@aws-cdk/aws-events-targets": "^1.62.0",
