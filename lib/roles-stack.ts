@@ -11,5 +11,13 @@ export class RolesStack extends cdk.Stack {
                 iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonAPIGatewayPushToCloudWatchLogs')
             ]
         });
+
+        new iam.Role(this, 'DMSVPCRole', {
+            assumedBy: new iam.ServicePrincipal('dms.amazonaws.com'),
+            managedPolicies: [
+                iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonDMSVPCManagementRole')
+            ],
+            roleName: 'dms-vpc-role'
+        });
     }
 }
