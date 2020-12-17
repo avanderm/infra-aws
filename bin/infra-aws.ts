@@ -7,6 +7,7 @@ import { RolesStack } from '../lib/roles-stack';
 import { ConfigStack } from '../lib/config-stack';
 import { ChatOpsStack } from '../lib/chatops-stack';
 import { TrailStack } from '../lib/trail-stack';
+import { StorageStack } from '../lib/storage-stack';
 // import { DnsStack } from '../lib/dns-stack';
 
 const app = new cdk.App();
@@ -86,4 +87,15 @@ new TrailStack(app, 'Trail', {
         Project: 'general'
     },
     dataBunkerAccount: dataBunkerAccount
+});
+
+new StorageStack(app, 'Storage', {
+    env: {
+        account: process.env.CDK_DEPLOY_ACCOUNT || process.env.CDK_DEFAULT_ACCOUNT,
+        region: process.env.CDK_DEPLOY_REGION || process.env.CDK_DEFAULT_REGION
+    },
+    tags: {
+        Environment: environment,
+        Project: 'general'
+    }
 });
