@@ -65,7 +65,7 @@ export class ChatOpsStack extends cdk.Stack {
         });
 
         const alarmTopic = new sns.Topic(this, 'AlarmTopic');
-        new chatbot.SlackChannelConfiguration(this, 'ConfigChannel', {
+        new chatbot.SlackChannelConfiguration(this, 'AlarmChannel', {
             notificationTopics: [
                 alarmTopic,
             ],
