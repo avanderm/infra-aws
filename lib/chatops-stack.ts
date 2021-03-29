@@ -63,5 +63,17 @@ export class ChatOpsStack extends cdk.Stack {
             slackChannelId: 'G01ALLYB21F',
             slackWorkspaceId: props.workspaceId
         });
+
+        const alarmTopic = new sns.Topic(this, 'AlarmTopic');
+        new chatbot.SlackChannelConfiguration(this, 'ConfigChannel', {
+            notificationTopics: [
+                alarmTopic,
+            ],
+            role: role,
+            slackChannelConfigurationName: 'aws-alarms',
+            slackChannelId: 'C01T2Q7GZMX',
+            slackWorkspaceId: props.workspaceId
+        });
+
     }
 }
